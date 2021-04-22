@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="JS 隐式转换, Kinoko">
+    <meta name="keywords" content="Java利用freemarker生成word报告, Kinoko">
     <meta name="description" content="程思楷">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -16,7 +16,7 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>JS 隐式转换 | Kinoko</title>
+    <title>Java利用freemarker生成word报告 | Kinoko</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
@@ -288,12 +288,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/20.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/17.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <h1 class="description center-align post-title">JS 隐式转换</h1>
+                    <h1 class="description center-align post-title">Java利用freemarker生成word报告</h1>
                 </div>
             </div>
         </div>
@@ -409,8 +409,12 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/javaScript/">
-                                <span class="chip bg-color">javaScript</span>
+                            <a href="/tags/java/">
+                                <span class="chip bg-color">java</span>
+                            </a>
+                        
+                            <a href="/tags/freemarker/">
+                                <span class="chip bg-color">freemarker</span>
                             </a>
                         
                     </div>
@@ -434,7 +438,7 @@
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2021-04-21
+                    2021-04-22
                 </div>
                 
 
@@ -443,14 +447,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    670
+                    485
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    2 分
+                    1 分
                 </div>
                 
 
@@ -465,72 +469,56 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>今天在复习隐式转换的时候发现了一些盲点，首先简要回顾一下隐式转换规则。</p>
-<h3 id=""><a href="#" class="headerlink" title="+"></a>+</h3><p>加号，既可以是算术运算符，也可以是字符串连接符，规则为：</p>
-<ul>
-<li>只要有一边是字符串，则是字符串连接符</li>
-<li>两边都是数字，才是算术运算符</li>
-</ul>
-<p>如果是其他类型，则调用相应的toString和Number()方法转换得到可运算的值。<br>一些特殊的toString和Number转换结果：<br>{ 1: 2 } // “[object Object]” NaN<br>[1, 2] // “1,2”  NaN<br>function fn(){} // function函数体  NaN<br>undefined、null、true、false，toString均为本身的字符串，Number结果分别为NaN、0、1、0</p>
-<pre class=" language-javascript"><code class="language-javascript"><span class="token number">1</span> <span class="token operator">+</span> <span class="token string">'true'</span> <span class="token comment" spellcheck="true">// "1true"</span>
-<span class="token number">1</span> <span class="token operator">+</span> <span class="token boolean">true</span> <span class="token comment" spellcheck="true">// 2</span>
-</code></pre>
-<p>以上就是之前我对+隐式转换的了解，特殊类型+数字用Number，特殊类型+字符串用toString。</p>
-<p>不过今天乱组合的时候发现了这样的情况</p>
-<pre class=" language-javascript"><code class="language-javascript">alert <span class="token operator">+</span> <span class="token string">''</span>
-<span class="token comment" spellcheck="true">// "function alert() { [native code] }"</span>
-alert <span class="token operator">+</span> <span class="token number">1</span>
-<span class="token comment" spellcheck="true">// "function alert() { [native code] }1"</span>
-<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">+</span> <span class="token string">''</span>
-<span class="token comment" spellcheck="true">// "1,2"</span>
-<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">+</span> <span class="token number">1</span>
-<span class="token comment" spellcheck="true">// "1,21"</span>
-</code></pre>
-<p>function和array在+运算时只会进行字符串拼接操作。</p>
-<pre class=" language-javascript"><code class="language-javascript"><span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token operator">+</span> <span class="token string">''</span>
-<span class="token comment" spellcheck="true">// 0</span>
-<span class="token string">''</span> <span class="token operator">+</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
-<span class="token comment" spellcheck="true">// "[object Object]"</span>
-<span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token operator">+</span> <span class="token number">1</span>
-<span class="token comment" spellcheck="true">// 1</span>
-<span class="token number">1</span> <span class="token operator">+</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
-<span class="token comment" spellcheck="true">// "1[object Object]"</span>
-</code></pre>
-<p>当{}在左边时，+总会被当成算术运算；当{}在右边时，+总会被当成字符串连接；无论另一边是什么类型。<br>这两个新规则也算是新盲点get。</p>
-<p>隐式转换其他规则：</p>
-<h3 id="关系运算符"><a href="#关系运算符" class="headerlink" title="关系运算符"></a>关系运算符</h3><p>只有一边是string，将其他数据类型用Number进行转换再比较;<br>当两边都是string，比较其Unicode编码，string.charCodeAt;<br>如果是多字符，则依次比较：</p>
-<pre class=" language-javascript"><code class="language-javascript"><span class="token number">2</span> <span class="token operator">></span> <span class="token string">'10'</span> <span class="token comment" spellcheck="true">// false 转成数字 2 > 10</span>
-<span class="token string">'2'</span> <span class="token operator">></span> <span class="token string">'10'</span> <span class="token comment" spellcheck="true">// true 都是字符串，比较'2'和'1'的Unicode编码</span>
-<span class="token string">'abc'</span> <span class="token operator">></span> <span class="token string">'aad'</span> <span class="token comment" spellcheck="true">// 第一位相等，比较第二位，'b' > 'a'，所以true</span>
-</code></pre>
-<h3 id="复杂数据类型"><a href="#复杂数据类型" class="headerlink" title="复杂数据类型"></a>复杂数据类型</h3><p>也就是最开始提到的对象、数组计算，规则是：<br>先用valueOf获取其原始值，如果不是Number类型（一般都不是，除非改写），则调用toString转成字符串，再转成number。转成什么类型视操作符及另一端决定。<br>经典题目：</p>
-<pre class=" language-javascript"><code class="language-javascript"><span class="token keyword">if</span> <span class="token punctuation">(</span>a <span class="token operator">==</span> <span class="token number">1</span> <span class="token operator">&amp;&amp;</span> a <span class="token operator">==</span> <span class="token number">2</span> <span class="token operator">&amp;&amp;</span> a <span class="token operator">==</span> <span class="token number">3</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'amazing'</span><span class="token punctuation">)</span>
-<span class="token punctuation">}</span>
-<span class="token comment" spellcheck="true">// a = ?</span>
-
-<span class="token comment" spellcheck="true">// answer</span>
-a <span class="token operator">=</span> <span class="token punctuation">{</span>
-    i<span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
-    valueOf<span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token operator">++</span>a<span class="token punctuation">.</span>i
+                <p>需求：项目要求在检测过程完成后可导出相应的检测报告。</p>
+<h3 id="准备ftl模板"><a href="#准备ftl模板" class="headerlink" title="准备ftl模板"></a>准备ftl模板</h3><p>制作过程为：</p>
+<ol>
+<li>将word文档另存为.xml格式</li>
+<li>将xml后缀改为ftl后缀</li>
+<li>修改插值，将变量部分改为${ varName }的格式。</li>
+</ol>
+<p>如下图所示：<br><img src="https://upload-images.jianshu.io/upload_images/24531434-2aeae3da81a35bac.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="freemarker插值.png"><br>注意：</p>
+<ol>
+<li> 有可能出现插值变量的{}分割的情况，要手动调整，保证${ varName }在一个标签内</li>
+<li>转储乱码，编码格式不一致，需要转码</li>
+<li>这里只列了单个插值，如果结合到循环判断等语法，需要对标签有一点熟悉程度</li>
+</ol>
+<p>freemarker手册  <a target="_blank" rel="noopener" href="http://freemarker.foofun.cn/">http://freemarker.foofun.cn/</a></p>
+<h3 id="将数据导入模板"><a href="#将数据导入模板" class="headerlink" title="将数据导入模板"></a>将数据导入模板</h3><p>数据格式为Map，key就是模板里的插值名称，如果缺少模板里的插值名称，控制台会报错（freemarker的报错一般比较好定位，都会指明原因和位置）。</p>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">/**
+* 将data写入模板
+* @param templetePath：模板文件路径
+* @param templeteName：模板文件名
+* @param filename：目标文件名
+* @param data：要写入模板文件的数据
+*/</span>
+<span class="token keyword">public</span> File <span class="token function">writeAnnualReport</span><span class="token punctuation">(</span>String templetePath<span class="token punctuation">,</span> String templeteName<span class="token punctuation">,</span> String filename<span class="token punctuation">,</span> Map<span class="token operator">&lt;</span>String<span class="token punctuation">,</span> Object<span class="token operator">></span> data<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">/**
+      * 加载模板
+      */</span>
+    File file <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">File</span><span class="token punctuation">(</span>filename<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">{</span>
+        <span class="token comment" spellcheck="true">//设置模板加载路径</span>
+        configuration<span class="token punctuation">.</span><span class="token function">setDirectoryForTemplateLoading</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">File</span><span class="token punctuation">(</span>templetePath<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        Template templete <span class="token operator">=</span> configuration<span class="token punctuation">.</span><span class="token function">getTemplate</span><span class="token punctuation">(</span>templeteName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//构造一个向目标文件写的流</span>
+        Writer writer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BufferedWriter</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">OutputStreamWriter</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">FileOutputStream</span><span class="token punctuation">(</span>file<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string">"utf-8"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//将数据填充到模板并写入目标文件</span>
+        templete<span class="token punctuation">.</span><span class="token function">process</span><span class="token punctuation">(</span>data<span class="token punctuation">,</span> writer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//写完关闭流</span>
+        writer<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">TemplateException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        e<span class="token punctuation">.</span><span class="token function">printStackTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> file<span class="token punctuation">;</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>这些也只是作为了解，知道复杂数据类型在隐式转换的过程中经历了哪些操作。</p>
-<h3 id="-1"><a href="#-1" class="headerlink" title="=="></a>==</h3><ul>
-<li>!是Boolean()格式化比较，只要出现了，就都要转成布尔值比较。</li>
-<li>都是引用类型，比较地址</li>
-</ul>
-<p>[] 和 {} 转换结果都是true</p>
-<pre class=" language-javascript"><code class="language-javascript"><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token number">0</span> <span class="token comment" spellcheck="true">// true 根据toString的结果，[]->""，Number("") -> 0 == 0</span>
-<span class="token operator">!</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token number">0</span> <span class="token comment" spellcheck="true">// true ![]->false == 0</span>
-<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token operator">!</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token comment" spellcheck="true">// true []->""->0 == false&lt;-![]</span>
-<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token comment" spellcheck="true">// false 比较地址</span>
-<span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token operator">==</span> <span class="token operator">!</span><span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token comment" spellcheck="true">// false {}->"[object Object]" != !{}->false</span>
-<span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token operator">==</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token comment" spellcheck="true">// false 比较地址</span>
+<pre class=" language-java"><code class="language-java">configuration <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Configuration</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+configuration<span class="token punctuation">.</span><span class="token function">setDefaultEncoding</span><span class="token punctuation">(</span><span class="token string">"UTF-8"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 </code></pre>
-<p>学习隐式转换并不是在开发中偷工减料，而是防止误操作，以及了解这些原理能够更好地纠错。</p>
+<p>configuration的初始化貌似有新的方法，IDE指出方法过时，不过这样也能用。</p>
+<h3 id="导出报告"><a href="#导出报告" class="headerlink" title="导出报告"></a>导出报告</h3><p>这里已经拿到file内容了，剩下的就是传给前端，项目里有下载文件接口的，也可以把文件放到固定的目录下。<br>实现下载接口就不赘述了，就是向response里写入数据，前端接收是Blob数据，下载用隐式a.href = 下载接口完成。</p>
 
                 
             </div>
@@ -557,7 +545,7 @@ a <span class="token operator">=</span> <span class="token punctuation">{</span>
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="https://jcbreak.github.io/2021/04/21/JS-%E9%9A%90%E5%BC%8F%E8%BD%AC%E6%8D%A2/">https://jcbreak.github.io/2021/04/21/JS-%E9%9A%90%E5%BC%8F%E8%BD%AC%E6%8D%A2/</a>
+                    <a href="https://jcbreak.github.io/2021/04/22/Java%E5%88%A9%E7%94%A8freemarker%E7%94%9F%E6%88%90word%E6%8A%A5%E5%91%8A/">https://jcbreak.github.io/2021/04/22/Java%E5%88%A9%E7%94%A8freemarker%E7%94%9F%E6%88%90word%E6%8A%A5%E5%91%8A/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -595,8 +583,12 @@ a <span class="token operator">=</span> <span class="token punctuation">{</span>
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/javaScript/">
-                                    <span class="chip bg-color">javaScript</span>
+                                <a href="/tags/java/">
+                                    <span class="chip bg-color">java</span>
+                                </a>
+                            
+                                <a href="/tags/freemarker/">
+                                    <span class="chip bg-color">freemarker</span>
                                 </a>
                             
                         </div>
@@ -646,6 +638,59 @@ a <span class="token operator">=</span> <span class="token punctuation">{</span>
             <div class="article-badge left-badge text-color">
                 <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
+                <a href="/2021/04/22/Arcgis%E5%8A%A0%E8%BD%BD%E5%B8%A6-%E7%9A%84%E8%BD%AC%E5%8F%91%E6%9C%8D%E5%8A%A1/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/8.jpg" class="responsive-img" alt="Arcgis加载带?的转发服务">
+                        
+                        <span class="card-title">Arcgis加载带?的转发服务</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2021-04-22
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/" class="post-category">
+                                    技术随笔
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/vue/">
+                        <span class="chip bg-color">vue</span>
+                    </a>
+                    
+                    <a href="/tags/Arcgis/">
+                        <span class="chip bg-color">Arcgis</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
                 <a href="/2021/04/21/hexo%E8%AF%86%E5%88%AB%E8%8A%B1%E6%8B%AC%E5%8F%B7/">
                     <div class="card-image">
                         
@@ -662,9 +707,9 @@ a <span class="token operator">=</span> <span class="token punctuation">{</span>
                         
                     </div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2021-04-21
-                        </span>
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2021-04-21
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
@@ -682,59 +727,6 @@ a <span class="token operator">=</span> <span class="token punctuation">{</span>
                     
                     <a href="/tags/hexo/">
                         <span class="chip bg-color">hexo</span>
-                    </a>
-                    
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">
-                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
-            </div>
-            <div class="card">
-                <a href="/2021/02/26/lodash/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/11.jpg" class="responsive-img" alt="lodash">
-                        
-                        <span class="card-title">lodash</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary block-with-text">
-                        
-                            
-                        
-                    </div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2021-02-26
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fas fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/" class="post-category">
-                                    技术随笔
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/javaScript/">
-                        <span class="chip bg-color">javaScript</span>
-                    </a>
-                    
-                    <a href="/tags/lodash/">
-                        <span class="chip bg-color">lodash</span>
                     </a>
                     
                 </div>

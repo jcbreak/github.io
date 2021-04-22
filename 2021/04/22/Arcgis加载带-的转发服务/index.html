@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="JS 隐式转换, Kinoko">
+    <meta name="keywords" content="Arcgis加载带?的转发服务, Kinoko">
     <meta name="description" content="程思楷">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -16,7 +16,7 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>JS 隐式转换 | Kinoko</title>
+    <title>Arcgis加载带?的转发服务 | Kinoko</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
@@ -288,12 +288,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/20.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/8.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <h1 class="description center-align post-title">JS 隐式转换</h1>
+                    <h1 class="description center-align post-title">Arcgis加载带?的转发服务</h1>
                 </div>
             </div>
         </div>
@@ -409,8 +409,12 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/javaScript/">
-                                <span class="chip bg-color">javaScript</span>
+                            <a href="/tags/vue/">
+                                <span class="chip bg-color">vue</span>
+                            </a>
+                        
+                            <a href="/tags/Arcgis/">
+                                <span class="chip bg-color">Arcgis</span>
                             </a>
                         
                     </div>
@@ -434,7 +438,7 @@
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2021-04-21
+                    2021-04-22
                 </div>
                 
 
@@ -443,14 +447,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    670
+                    1.3k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    2 分
+                    6 分
                 </div>
                 
 
@@ -465,72 +469,159 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>今天在复习隐式转换的时候发现了一些盲点，首先简要回顾一下隐式转换规则。</p>
-<h3 id=""><a href="#" class="headerlink" title="+"></a>+</h3><p>加号，既可以是算术运算符，也可以是字符串连接符，规则为：</p>
-<ul>
-<li>只要有一边是字符串，则是字符串连接符</li>
-<li>两边都是数字，才是算术运算符</li>
-</ul>
-<p>如果是其他类型，则调用相应的toString和Number()方法转换得到可运算的值。<br>一些特殊的toString和Number转换结果：<br>{ 1: 2 } // “[object Object]” NaN<br>[1, 2] // “1,2”  NaN<br>function fn(){} // function函数体  NaN<br>undefined、null、true、false，toString均为本身的字符串，Number结果分别为NaN、0、1、0</p>
-<pre class=" language-javascript"><code class="language-javascript"><span class="token number">1</span> <span class="token operator">+</span> <span class="token string">'true'</span> <span class="token comment" spellcheck="true">// "1true"</span>
-<span class="token number">1</span> <span class="token operator">+</span> <span class="token boolean">true</span> <span class="token comment" spellcheck="true">// 2</span>
+                <p>前言：<br>&nbsp;&nbsp;&nbsp;&nbsp;项目是用vue做的政府项目，有个需求是加载国土空间信息平台的Arcgis服务，这个申请下来是带ip的http请求，出于安全性考虑，政务网ip需要授权才能请求该服务，但是又不可能每个浏览器端都这么整，所以需要用国土空间信息平台的转发代理，地址形似于 httpsAddr/proxy?realAddr，前面的httpsAddr是政务网访问通用的。<br>&nbsp;&nbsp;&nbsp;&nbsp;问题就来了，这个?会被解析成queryParam的分隔符，相当于把realAddr看成了查询参数的键，值为空字符串。这个解析过程在esri-leaflet中也有，另外，Arcgis3.x与Arcgis4.x的解析不太一样。</p>
+<h3 id="API差异"><a href="#API差异" class="headerlink" title="API差异"></a>API差异</h3><p>除了地址外，手头上的数据还有服务类型，所以首先，需要先将调用加载服务的API对应情况搞清楚。在调试时，我是凭百度和猜词义的，今天又看了下arcgis文档，找到了对应关系的说明：<br><a target="_blank" rel="noopener" href="https://developers.arcgis.com/javascript/latest/functionality-matrix/#esrilayers">https://developers.arcgis.com/javascript/latest/functionality-matrix/#esrilayers</a><br>3.x中ArcGISDynamicMapServiceLayer、DynamicLayer对应4.x的MapImageLayer<br>3.x中ArcGISTiledMapServiceLayer对应4.x的TileLayer<br>还有个ImageLayer没用到，我是直接作为img.src放上去的，效果还可以。<br><strong>下文均以Arcgis4.x为例</strong></p>
+<h3 id="vue加载arcgis模块"><a href="#vue加载arcgis模块" class="headerlink" title="vue加载arcgis模块"></a>vue加载arcgis模块</h3><p>vue加载arcgis模块并不是npm直接下载依赖包，而是安装了esri-loader模块，这个模块会动态请求<a target="_blank" rel="noopener" href="https://js.arcgis.com/version">https://js.arcgis.com/version</a> 的依赖，有点像require，但是是require远程的。</p>
+<pre class=" language-JavaScript"><code class="language-JavaScript">esriLoader.loadModules('esri/request', 'esri/core/promiseUtils', 'esri/core/urlUtils'])
+      .then(([request, promiseUtils, urlUtils]) => { some code })
 </code></pre>
-<p>以上就是之前我对+隐式转换的了解，特殊类型+数字用Number，特殊类型+字符串用toString。</p>
-<p>不过今天乱组合的时候发现了这样的情况</p>
-<pre class=" language-javascript"><code class="language-javascript">alert <span class="token operator">+</span> <span class="token string">''</span>
-<span class="token comment" spellcheck="true">// "function alert() { [native code] }"</span>
-alert <span class="token operator">+</span> <span class="token number">1</span>
-<span class="token comment" spellcheck="true">// "function alert() { [native code] }1"</span>
-<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">+</span> <span class="token string">''</span>
-<span class="token comment" spellcheck="true">// "1,2"</span>
-<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">+</span> <span class="token number">1</span>
-<span class="token comment" spellcheck="true">// "1,21"</span>
+<p>这种按需加载的方式效率很好，不会占用项目体积。而且，这样请求是有缓存的，也是一个小坑，后面再提。</p>
+<h3 id="修改原型"><a href="#修改原型" class="headerlink" title="修改原型"></a>修改原型</h3><p>直接上结果，过程也忘了，还挺曲折的。</p>
+<pre class=" language-JavaScript"><code class="language-JavaScript">// methods
+{
+  addTileLayer(id, url) {
+    esriLoader.loadModules(['esri/layers/TileLayer', 'esri/request', 'esri/core/promiseUtils', 'esri/core/urlUtils'])
+      .then(
+        ([TileLayer, request, w, urlUtils]) => {
+          urlUtils.addQueryParameters = function (b, d) {
+            if (!d || Object.keys(d).length === 0) {
+              return b
+            } else {
+              for (let pkey in d) {
+                if (d.hasOwnProperty(pkey) && d[pkey]) {
+                  let value = d[pkey]
+                  b += `${pkey}=${value}&`
+                }
+              }
+              return b.substr(0, b.length - 1)
+            }
+          }
+          Object.defineProperty(TileLayer.prototype, "url", {
+            set: function (a) {
+              this._set('url', a)
+            },
+            enumerable: !0,
+            configurable: !0
+          })
+          TileLayer.prototype._fetchService = function (a) {
+            var b = this
+            return w.create(function (d, e) {
+              if (b.sourceJSON) {
+                d({ data: b.sourceJSON })
+              } else {
+                if (!b.parsedUrl) throw new c('tile-layer:undefined-url',
+                  'layer\'s url is not defined')
+                // 修改url部分
+                request(url + '?f=json', {
+                  responseType: 'json',
+                  signal: a
+                }).then(d, e)
+              }
+            }).then(function (c) {
+              c.ssl && (b.url = b.url.replace(/^http:/i, 'https:'))
+              b.sourceJSON = c.data
+              b.read(c.data, { origin: 'service', url: b.parsedUrl })
+              if (10.1 === b.version && !P.isHostedAgolService(b.url)) return b._fetchServerVersion(b.url, a).then(function (a) {
+                b.read({ currentVersion: a })
+              }).catch(function () {
+              })
+            })
+          }
+          TileLayer.prototype.getTileUrl = function (level, row, col) {
+            return this.url + '/tile/' + level + '/' + row + '/' + col
+          }
+          this.arcGisLayer = null
+          let layer = new TileLayer({
+            id: id,
+            url: url
+          })
+          this.map.layers.add(layer)
+          this.arcGisLayerList[id] = layer
+        })
+  },
+  addDynamicLayer(id, url) {
+    esriLoader.loadModules([
+      'esri/layers/MapImageLayer',
+      'esri/request', 'esri/core/promiseUtils', 'esri/core/tsSupport/awaiterHelper',
+      'esri/core/tsSupport/generatorHelper', 'esri/core/tsSupport/assignHelper', 'esri/core/Error'
+    ]).then((
+      [MapImageLayer, q, x, t, d, k, p]) => {
+      MapImageLayer.prototype._fetchService = function (a) {
+        return t(this, void 0, void 0, function () {
+          var b, e, f;
+          return d(this, function (d) {
+            switch (d.label) {
+              case 0:
+                return this.sourceJSON ? (this.read(this.sourceJSON, {
+                  origin: "service",
+                  url: this.parsedUrl
+                }), [2]) :
+                  [4, q(url + '?f=json', { signal: a })];
+              case 1:
+                b = d.sent();
+                e = b.data;
+                if (f = b.ssl)
+                  this.url = this.url.replace(/^http:/i, "https:");
+                this.sourceJSON = e;
+                // 修改url部分
+                this.read(e, {
+                  origin: "service",
+                  url: url
+                });
+                return [2]
+            }
+          })
+        })
+      }
+      MapImageLayer.prototype.fetchImage = function (a, b, d, e) {
+        var f = {
+          responseType: "image"
+        };
+        e && e.timestamp && (f.query = {
+          _ts: e.timestamp
+        });
+        e && e.signal && (f.signal = e.signal);
+        // 加了个？
+        var g = url + "/export?";
+        a = k({}, {}, this.createExportImageParameters(a, b, d, e), {
+          f: "image",
+          _ts: this.alwaysRefetch ? Date.now() : null
+        });
+        if (null != a.dynamicLayers && !this.capabilities.exportMap.supportsDynamicLayers)
+          return x.reject(new p("mapimagelayer:dynamiclayer-not-supported", "service " + this.url + " doesn't support dynamic layers, which is required to be able to change the sublayer's order, rendering, labeling or source.", {
+            query: a
+          }));
+        f.query = f.query ? k({}, a, f.query) : a;
+        // 新增
+        f.query.dynamicLayers && delete f.query.dynamicLayers
+        return q(g, f).then(function (a) {
+          return a.data
+        }).catch(function (a) {
+          if (x.isAbortError(a))
+            throw a;
+          throw new p("mapimagelayer:image-fetch-error", "Unable to load image: " + g, {
+            error: a
+          });
+        })
+      }
+      this.arcGisLayer = null
+      let layer = new MapImageLayer({
+        id: id,
+        url: url
+      })
+      this.map.layers.add(layer)
+      this.arcGisLayerList[id] = layer
+    })
+  }
+}
 </code></pre>
-<p>function和array在+运算时只会进行字符串拼接操作。</p>
-<pre class=" language-javascript"><code class="language-javascript"><span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token operator">+</span> <span class="token string">''</span>
-<span class="token comment" spellcheck="true">// 0</span>
-<span class="token string">''</span> <span class="token operator">+</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
-<span class="token comment" spellcheck="true">// "[object Object]"</span>
-<span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token operator">+</span> <span class="token number">1</span>
-<span class="token comment" spellcheck="true">// 1</span>
-<span class="token number">1</span> <span class="token operator">+</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
-<span class="token comment" spellcheck="true">// "1[object Object]"</span>
+<p>修改部分主要在于_fetchService，将其request的url参数（原为this.url）修改为原始url，当然也可以修改this.url的set处理，示例里简单粗暴地完全赋值，实际也没用到。<br>_fetchService之后，TileLayer会调用getTileUrl获取瓦片数据，这里除了重写getTileUrl，还要重写urlUtils.addQueryParameters，具体过程有点迂回，在request的内部处理里面。<br>到addQueryParameters时，原来会解析成realAddr=，我当时的处理是直接改成</p>
+<pre class=" language-JavaScript"><code class="language-JavaScript">// b是url，d是参数对象
+urlUtils.addQueryParameters = function (b, d) {
+    return b
+}
 </code></pre>
-<p>当{}在左边时，+总会被当成算术运算；当{}在右边时，+总会被当成字符串连接；无论另一边是什么类型。<br>这两个新规则也算是新盲点get。</p>
-<p>隐式转换其他规则：</p>
-<h3 id="关系运算符"><a href="#关系运算符" class="headerlink" title="关系运算符"></a>关系运算符</h3><p>只有一边是string，将其他数据类型用Number进行转换再比较;<br>当两边都是string，比较其Unicode编码，string.charCodeAt;<br>如果是多字符，则依次比较：</p>
-<pre class=" language-javascript"><code class="language-javascript"><span class="token number">2</span> <span class="token operator">></span> <span class="token string">'10'</span> <span class="token comment" spellcheck="true">// false 转成数字 2 > 10</span>
-<span class="token string">'2'</span> <span class="token operator">></span> <span class="token string">'10'</span> <span class="token comment" spellcheck="true">// true 都是字符串，比较'2'和'1'的Unicode编码</span>
-<span class="token string">'abc'</span> <span class="token operator">></span> <span class="token string">'aad'</span> <span class="token comment" spellcheck="true">// 第一位相等，比较第二位，'b' > 'a'，所以true</span>
-</code></pre>
-<h3 id="复杂数据类型"><a href="#复杂数据类型" class="headerlink" title="复杂数据类型"></a>复杂数据类型</h3><p>也就是最开始提到的对象、数组计算，规则是：<br>先用valueOf获取其原始值，如果不是Number类型（一般都不是，除非改写），则调用toString转成字符串，再转成number。转成什么类型视操作符及另一端决定。<br>经典题目：</p>
-<pre class=" language-javascript"><code class="language-javascript"><span class="token keyword">if</span> <span class="token punctuation">(</span>a <span class="token operator">==</span> <span class="token number">1</span> <span class="token operator">&amp;&amp;</span> a <span class="token operator">==</span> <span class="token number">2</span> <span class="token operator">&amp;&amp;</span> a <span class="token operator">==</span> <span class="token number">3</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'amazing'</span><span class="token punctuation">)</span>
-<span class="token punctuation">}</span>
-<span class="token comment" spellcheck="true">// a = ?</span>
-
-<span class="token comment" spellcheck="true">// answer</span>
-a <span class="token operator">=</span> <span class="token punctuation">{</span>
-    i<span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
-    valueOf<span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> <span class="token operator">++</span>a<span class="token punctuation">.</span>i
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
-</code></pre>
-<p>这些也只是作为了解，知道复杂数据类型在隐式转换的过程中经历了哪些操作。</p>
-<h3 id="-1"><a href="#-1" class="headerlink" title="=="></a>==</h3><ul>
-<li>!是Boolean()格式化比较，只要出现了，就都要转成布尔值比较。</li>
-<li>都是引用类型，比较地址</li>
-</ul>
-<p>[] 和 {} 转换结果都是true</p>
-<pre class=" language-javascript"><code class="language-javascript"><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token number">0</span> <span class="token comment" spellcheck="true">// true 根据toString的结果，[]->""，Number("") -> 0 == 0</span>
-<span class="token operator">!</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token number">0</span> <span class="token comment" spellcheck="true">// true ![]->false == 0</span>
-<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token operator">!</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token comment" spellcheck="true">// true []->""->0 == false&lt;-![]</span>
-<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token comment" spellcheck="true">// false 比较地址</span>
-<span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token operator">==</span> <span class="token operator">!</span><span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token comment" spellcheck="true">// false {}->"[object Object]" != !{}->false</span>
-<span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token operator">==</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token comment" spellcheck="true">// false 比较地址</span>
-</code></pre>
-<p>学习隐式转换并不是在开发中偷工减料，而是防止误操作，以及了解这些原理能够更好地纠错。</p>
+<p>也确实没问题，图个省事，d为空对象，当时也没有请求带参数的情况。<br>但是由于请求缓存的原因，这里的改动相当于全局修改，urlUtils是esri/core下的工具类。<br>而MapImageLayer在_fetchService之后会调用fetchImage，这个方法的请求是带参的，在request时也调用了addQueryParameters，所以就出了问题。最终是改成了最终结果那样。<br><strong>至此，Arcgis加载带?的转发服务的实现思路就完了。</strong><br>虽然产出成果不多，但也花了好几天时间，主要是压缩源码看的太费精力了，一是单字母的含义需要对应require的模块，二是三目表达式太多了，还带括号换行的，很容易漏掉断点，最难的是request部分的断点，跟进到addQueryParameters花了很多时间。不过好在肝出来了，下次看源码会更有经验一些。</p>
 
                 
             </div>
@@ -557,7 +648,7 @@ a <span class="token operator">=</span> <span class="token punctuation">{</span>
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="https://jcbreak.github.io/2021/04/21/JS-%E9%9A%90%E5%BC%8F%E8%BD%AC%E6%8D%A2/">https://jcbreak.github.io/2021/04/21/JS-%E9%9A%90%E5%BC%8F%E8%BD%AC%E6%8D%A2/</a>
+                    <a href="https://jcbreak.github.io/2021/04/22/Arcgis%E5%8A%A0%E8%BD%BD%E5%B8%A6-%E7%9A%84%E8%BD%AC%E5%8F%91%E6%9C%8D%E5%8A%A1/">https://jcbreak.github.io/2021/04/22/Arcgis%E5%8A%A0%E8%BD%BD%E5%B8%A6-%E7%9A%84%E8%BD%AC%E5%8F%91%E6%9C%8D%E5%8A%A1/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -595,8 +686,12 @@ a <span class="token operator">=</span> <span class="token punctuation">{</span>
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/javaScript/">
-                                    <span class="chip bg-color">javaScript</span>
+                                <a href="/tags/vue/">
+                                    <span class="chip bg-color">vue</span>
+                                </a>
+                            
+                                <a href="/tags/Arcgis/">
+                                    <span class="chip bg-color">Arcgis</span>
                                 </a>
                             
                         </div>
@@ -642,17 +737,18 @@ a <span class="token operator">=</span> <span class="token punctuation">{</span>
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
             <div class="card">
-                <a href="/2021/04/21/hexo%E8%AF%86%E5%88%AB%E8%8A%B1%E6%8B%AC%E5%8F%B7/">
+                <a href="/2021/04/22/Arcgis%E5%8A%A0%E8%BD%BD%E5%B8%A6-%E7%9A%84%E8%BD%AC%E5%8F%91%E6%9C%8D%E5%8A%A1/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/21.jpg" class="responsive-img" alt="hexo识别花括号">
+                        <img src="/medias/featureimages/8.jpg" class="responsive-img" alt="Arcgis加载带?的转发服务">
                         
-                        <span class="card-title">hexo识别花括号</span>
+                        <span class="card-title">Arcgis加载带?的转发服务</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
@@ -662,26 +758,31 @@ a <span class="token operator">=</span> <span class="token punctuation">{</span>
                         
                     </div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2021-04-21
-                        </span>
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2021-04-22
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/%E8%BD%AC%E8%BD%BD/" class="post-category">
-                                    转载
+                            <a href="/categories/%E6%8A%80%E6%9C%AF%E9%9A%8F%E7%AC%94/" class="post-category">
+                                    技术随笔
                                 </a>
                             
                             
                         </span>
                     </div>
                 </div>
+
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/hexo/">
-                        <span class="chip bg-color">hexo</span>
+                    <a href="/tags/vue/">
+                        <span class="chip bg-color">vue</span>
+                    </a>
+                    
+                    <a href="/tags/Arcgis/">
+                        <span class="chip bg-color">Arcgis</span>
                     </a>
                     
                 </div>
@@ -695,13 +796,13 @@ a <span class="token operator">=</span> <span class="token punctuation">{</span>
                 下一篇&nbsp;<i class="fas fa-chevron-right"></i>
             </div>
             <div class="card">
-                <a href="/2021/02/26/lodash/">
+                <a href="/2021/04/22/Java%E5%88%A9%E7%94%A8freemarker%E7%94%9F%E6%88%90word%E6%8A%A5%E5%91%8A/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/11.jpg" class="responsive-img" alt="lodash">
+                        <img src="/medias/featureimages/17.jpg" class="responsive-img" alt="Java利用freemarker生成word报告">
                         
-                        <span class="card-title">lodash</span>
+                        <span class="card-title">Java利用freemarker生成word报告</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
@@ -712,7 +813,7 @@ a <span class="token operator">=</span> <span class="token punctuation">{</span>
                     </div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2021-02-26
+                                <i class="far fa-clock fa-fw icon-date"></i>2021-04-22
                             </span>
                         <span class="publish-author">
                             
@@ -729,12 +830,12 @@ a <span class="token operator">=</span> <span class="token punctuation">{</span>
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/javaScript/">
-                        <span class="chip bg-color">javaScript</span>
+                    <a href="/tags/java/">
+                        <span class="chip bg-color">java</span>
                     </a>
                     
-                    <a href="/tags/lodash/">
-                        <span class="chip bg-color">lodash</span>
+                    <a href="/tags/freemarker/">
+                        <span class="chip bg-color">freemarker</span>
                     </a>
                     
                 </div>
